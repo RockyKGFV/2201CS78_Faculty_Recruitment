@@ -1,94 +1,93 @@
-// Import the Express.js framework
+// Import the Express.js framework for building web applications.
 import express from "express";
 
-// Create a new Express.js application
+// Create a new Express.js application, which will be used to handle HTTP requests and responses.
 const app = express();
 
-// Import the Multer middleware for handling file uploads
+// Import the Multer middleware, which is used for handling multipart/form-data requests, such as file uploads.
 import multer from "multer";
 
-// Import the Path module for working with file paths
+// Import the Path module, which provides utilities for working with file paths and directories.
 import path from "path";
 
-// Import the EJS-Mate template engine
+// Import the EJS-Mate template engine, which is used for rendering dynamic HTML templates.
 import ejsmate from "ejs-mate";
 
-// Import the MySQL2 module for interacting with the database
+// Import the MySQL2 module, which is used for interacting with MySQL databases.
 import mysql from "mysql2";
 
-// Import the Bcrypt module for password hashing
+// Import the Bcrypt module, which is used for password hashing and verification.
 import bcrypt from "bcrypt";
 
-// Import the Body-Parser middleware for parsing request bodies
+// Import the Body-Parser middleware, which is used for parsing incoming request bodies.
 import bodyParser from "body-parser";
 
-// Import the Express-Session middleware for managing sessions
+// Import the Express-Session middleware, which is used for managing user sessions.
 import session from "express-session";
 
-// Import the Passport.js authentication framework
+// Import the Passport.js authentication framework, which is used for authenticating users.
 import passport from "passport";
 
-// Import the LocalStrategy for Passport.js
+// Import the LocalStrategy for Passport.js, which is used for authenticating users using a username and password.
 import { Strategy as LocalStrategy } from "passport-local";
 
-// Import the Connect-Flash middleware for flash messages
+// Import the Connect-Flash middleware, which is used for displaying flash messages to users.
 import flash from "connect-flash";
 
-// Import the Nodemailer module for sending emails
+// Import the Nodemailer module, which is used for sending emails.
 import nodemailer from "nodemailer";
 
-// Body parser middleware to parse incoming request bodies in JSON format
+// Body parser middleware to parse incoming request bodies in JSON format.
 app.use(bodyParser.json());
 
-// Body parser middleware to parse incoming request bodies in URL-encoded format
+// Body parser middleware to parse incoming request bodies in URL-encoded format.
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Set the template engine to EJS
+// Set the template engine to EJS.
 app.engine("ejs", ejsmate);
 
-// Set the default view engine to EJS
+// Set the default view engine to EJS.
 app.set("view engine", "ejs");
 
-// Get the current file URL and directory
+// Get the current file URL and directory.
 import { fileURLToPath } from "url";
-import { Console } from "console";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Set the views directory to the current directory
+// Set the views directory to the current directory.
 app.set("views", path.join(__dirname, "views"));
 
-// Serve static files from the public directory
+// Serve static files from the public directory.
 app.use(express.static(path.join(__dirname, "public")));
 
-// Multer setup for handling file uploads
+// Multer setup for handling file uploads.
 const storage = multer.diskStorage({
-  // Destination for uploaded files
+  // Destination for uploaded files.
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
   },
-  // File naming strategy
+  // File naming strategy.
   filename: function (req, file, cb) {
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   }
 });
 
-// Create a Multer instance with the storage setup
+// Create a Multer instance with the storage setup.
 const upload = multer({ storage: storage });
 
-// MySQL connection setup
+// MySQL connection setup.
 const db = mysql.createConnection({
-  // Host for the MySQL database
+  // Host for the MySQL database.
   host: "mysqldb",
-  // User for the MySQL database
+  // User for the MySQL database.
   user: "root",
-  // Password for the MySQL database
+  // Password for the MySQL database.
   password: "qazwsxeD3#",
-  // Database name
+  // Database name.
   database: "DBMS_pro2",
 });
 
-// Connect to the MySQL database
+// Connect to the MySQL database.
 db.connect((err) => {
   if (err) {
     console.log(err);
@@ -97,11 +96,11 @@ db.connect((err) => {
   }
 });
 
-// Error handling for MySQL connection
+// Error handling for MySQL connection.
 db.on('error', (err) => {
   console.error('MySQL connection error:', err);
   if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-    // Attempt to re-establish connection
+    // Attempt to re-establish connection.
     db.connect((err) => {
       if (err) {
         console.error('Error reconnecting to MySQL:', err);
@@ -110,26 +109,26 @@ db.on('error', (err) => {
       console.log("MySQL reconnected");
     });
   } else {
-    throw err; // Don't know what to do with this kind of error
+    throw err;
   }
 });
 
-// Session middleware setup
+// Session middleware setup.
 app.use(
   session({
-    // Secret key for session encryption
+    // Secret key for session encryption.
     secret: "mysupersecretcode",
-    // Resave session on every request
+    // Resave session on every request.
     resave: false,
-    // Save uninitialized session
+    // Save uninitialized session.
     saveUninitialized: true,
-    // Cookie settings for session
+    // Cookie settings for session.
     cookie: {
-      // Expiration time for session cookie
-      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1 week
-      // Maximum age for session cookie
+      // Expiration time for session cookie.
+      expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      // Maximum age for session cookie.
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      // HTTP-only flag for session cookie
+      // HTTP-only flag for session cookie.
       httpOnly: true,
     },
   })
