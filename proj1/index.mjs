@@ -1,99 +1,153 @@
+// Import the Express.js framework
 import express from "express";
+
+// Create a new Express.js application
 const app = express();
+
+// Import the Multer middleware for handling file uploads
 import multer from "multer";
+
+// Import the Path module for working with file paths
 import path from "path";
+
+// Import the EJS-Mate template engine
 import ejsmate from "ejs-mate";
+
+// Import the MySQL2 module for interacting with the database
 import mysql from "mysql2";
+
+// Import the Bcrypt module for password hashing
 import bcrypt from "bcrypt";
+
+// Import the Body-Parser middleware for parsing request bodies
 import bodyParser from "body-parser";
+
+// Import the Express-Session middleware for managing sessions
 import session from "express-session";
+
+// Import the Passport.js authentication framework
 import passport from "passport";
+
+// Import the LocalStrategy for Passport.js
 import { Strategy as LocalStrategy } from "passport-local";
+
+// Import the Connect-Flash middleware for flash messages
 import flash from "connect-flash";
+
+// Import the Nodemailer module for sending emails
 import nodemailer from "nodemailer";
-// Body parser middleware
+
+// Body parser middleware to parse incoming request bodies in JSON format
 app.use(bodyParser.json());
+
+// Body parser middleware to parse incoming request bodies in URL-encoded format
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// EJS setup
+// Set the template engine to EJS
 app.engine("ejs", ejsmate);
+
+// Set the default view engine to EJS
 app.set("view engine", "ejs");
+
+// Get the current file URL and directory
 import { fileURLToPath } from "url";
 import { Console } from "console";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Set the views directory to the current directory
 app.set("views", path.join(__dirname, "views"));
 
-// Serve static files
+// Serve static files from the public directory
 app.use(express.static(path.join(__dirname, "public")));
 
-//multr setup
+// Multer setup for handling file uploads
 const storage = multer.diskStorage({
+  // Destination for uploaded files
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
   },
+  // File naming strategy
   filename: function (req, file, cb) {
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   }
 });
 
+// Create a Multer instance with the storage setup
 const upload = multer({ storage: storage });
-// MySQL connection
+
+// MySQL connection setup
 const db = mysql.createConnection({
+  // Host for the MySQL database
   host: "mysqldb",
+  // User for the MySQL database
   user: "root",
+  // Password for the MySQL database
   password: "qazwsxeD3#",
+  // Database name
   database: "DBMS_pro2",
 });
 
-// Connect to MySQL
+// Connect to the MySQL database
 db.connect((err) => {
   if (err) {
     console.log(err);
   } else {
     console.log("MySQL connected");
   }
-}); 
- db.on('error', (err) => {
+});
+
+// Error handling for MySQL connection
+db.on('error', (err) => {
   console.error('MySQL connection error:', err);
   if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-     // Attempt to re-establish connection.
-     db.connect((err) => {
-       if (err) {
-         console.error('Error reconnecting to MySQL:', err);
-         return;
-       }
-       console.log("MySQL reconnected");
-     });
+    // Attempt to re-establish connection
+    db.connect((err) => {
+      if (err) {
+        console.error('Error reconnecting to MySQL:', err);
+        return;
+      }
+      console.log("MySQL reconnected");
+    });
   } else {
-     throw err; // Don't know what to do with this kind of error
+    throw err; // Don't know what to do with this kind of error
   }
- });
+});
 
-// Session middleware
+// Session middleware setup
 app.use(
   session({
+    // Secret key for session encryption
     secret: "mysupersecretcode",
+    // Resave session on every request
     resave: false,
+    // Save uninitialized session
     saveUninitialized: true,
+    // Cookie settings for session
     cookie: {
+      // Expiration time for session cookie
       expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1 week
+      // Maximum age for session cookie
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      // HTTP-only flag for session cookie
       httpOnly: true,
     },
   })
 );
 
-// Passport initialization
+// Passport.js initialization
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Middleware to set current user in locals
 app.use((req, res, next) => {
+  // Set current user in locals
   res.locals.currUser = req.user;
   req.session.currUser = req.user;
   next();
 });
+
+// Serve uploaded files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 db.query(`CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
