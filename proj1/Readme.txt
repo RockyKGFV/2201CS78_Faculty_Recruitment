@@ -6,8 +6,8 @@ This is a Node.js application that connects to a MySQL database. It uses Docker 
 
 1. Clone the repository:
 
-git clone https://github.com/Akashthefirst/2201AI02_CS260.git
-cd 2201AI02_CS260/proj1
+git clone https://github.com/RockyKGFV/2201CS78_Faculty_Recruitment.git 
+cd 2201CS78_Faculty_Recruitment/proj1
 
 
 2.Install dependencies : npm i
